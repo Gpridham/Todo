@@ -10,7 +10,7 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     
-        var itemArray = ["Test1", "Test2", "Test3"]
+        var itemArray = [ToDoItem]()
     
         let defaults = UserDefaults.standard
     
@@ -18,7 +18,11 @@ class TodoListViewController: UITableViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+        let newItem = ToDoItem()
+        newItem.title = "Test One"
+        itemArray.append(newItem)
+        
+        if let items = defaults.array(forKey: "TodoListArray") as? [ToDoItem] {
             itemArray = items
         }
         
@@ -30,7 +34,9 @@ class TodoListViewController: UITableViewController {
         
         let cell = self.tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath) as! ToDoTableViewCell
         
-        cell.item.text = itemArray[indexPath.row]
+        cell.item.text = itemArray[indexPath.row].title
+        
+        cell.accessoryType = itemArray[indexPath.row].done ? .checkmark : .none
         
         return cell
         
@@ -45,12 +51,9 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = self.tableView.cellForRow(at: indexPath) as! ToDoTableViewCell
         
-        if cell.accessoryType == .checkmark {
-            cell.accessoryType = .none
-        }
-        else {
-            cell.accessoryType = .checkmark
-        }
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        
+        tableView.reloadData()
         
         tableView.deselectRow(at: indexPath, animated: true)
         print(cell.item.text!)
@@ -65,8 +68,11 @@ class TodoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             // what happens when user clicks the add item button
             print("Success")
-            self.itemArray.append(alert.textFields![0].text!)
-            print( alert.textFields![0].text!)
+            let newItem = ToDoItem()
+            newItem.title = alert.textFields![0].text!
+            
+            self.itemArray.append(newItem)
+           
             
             self.defaults.set(self.itemArray, forKey: "TodoListArray")
             
